@@ -1,0 +1,367 @@
+create a Concret Player class that extends Player
+
+public final class DartPlayer extends Player
+{
+	@Override
+	public void start()
+	{
+		data input and moviment
+		addCharacterInput(new DartPlayerInputs(this));
+		addCharacterMoviment(new DartPlayerMoviment(this));
+		
+		pos of the player on screen
+		SCREEN_X = GameLuncher.WIDTH/2+64/2;
+		SCREEN_Y = GameLuncher.HEIGHT/2+64/2;
+	
+		collision objectv
+		solidAreaX = 22;
+		solidAreaY = 32;
+	
+		collider = new Collider(1,0, solidAreaX,solidAreaY, 20, 20, "Player");
+		image data
+		animations = new CharacterLoader().loadeAnimationFromXMLFile("/player/player.xml", this);
+	}
+	
+	@Override
+	public void draw(Graphics2D graphics2d,int playerXOffset,int playerYOffset)
+	{	
+		
+		super.draw(graphics2d, playerXOffset, playerYOffset);
+		
+		draw player collider
+		graphics2d.setColor(Color.yellow);
+		graphics2d.drawRect(SCREEN_X+solidAreaX, 
+				SCREEN_Y+solidAreaY,
+				collider.getWidth(), collider.getHeight());
+	}
+}
+
+create a concrete Input class that extends AbstractCharacterInput
+/**
+ * The Class CharacterInputs.
+ */
+public final class DartPlayerInputs extends AbstractCharacterInput
+{
+	/**
+	 * Instantiates a new character inputs.
+	 *
+	 * @param character the character
+	 */
+	public DartPlayerInputs(AbstractCharacter character)
+	{
+		super(character);
+	}
+	
+	/**
+	 * Update inputs.
+	 */
+	public void updateInputs()
+	{	
+		if(isUp())
+		{
+			character.direction = FourDirections.UP;
+			character.moving = true;
+		}
+		else if(isDown())
+		{
+			character.direction = FourDirections.DOWN;
+			character.moving = true;
+		}
+		else if(isLeft())
+		{
+			character.direction = FourDirections.LEFT;
+			character.moving = true;
+		}
+		else if(isRight())
+		{
+			character.direction = FourDirections.RIGHT;
+			character.moving = true;
+		}
+		else
+		{
+			character.moving = false;
+		}
+	}
+
+	/**
+	 * Checks if is right.
+	 *
+	 * @return true, if is right
+	 */
+	private boolean isRight()
+	{
+		return GameInput.keyDown(KeyEvent.VK_D) || GameInput.keyDown(KeyEvent.VK_RIGHT);
+	}
+
+	/**
+	 * Checks if is left.
+	 *
+	 * @return true, if is left
+	 */
+	private boolean isLeft()
+	{
+		return GameInput.keyDown(KeyEvent.VK_A) || GameInput.keyDown(KeyEvent.VK_LEFT);
+	}
+
+	/**
+	 * Checks if is down.
+	 *
+	 * @return true, if is down
+	 */
+	private boolean isDown()
+	{
+		return GameInput.keyDown(KeyEvent.VK_S) || GameInput.keyDown(KeyEvent.VK_DOWN);
+	}
+
+	/**
+	 * Checks if is up.
+	 *
+	 * @return true, if is up
+	 */
+	private boolean isUp()
+	{
+		return GameInput.keyDown(KeyEvent.VK_W) || GameInput.keyDown(KeyEvent.VK_UP);
+	}
+}
+
+create a concrete Moviment class that extends AbstractCharacterMoviment
+/**
+ * The Class CharacterMoviment.
+ */
+public final class DartPlayerMoviment extends AbstractCharacterMoviment
+{
+	public DartPlayerMoviment(AbstractCharacter character)
+	{
+		super(character);
+		
+	}
+
+	/**
+	 * Standing.
+	 */
+	private void standing(IAnimationManager animations)
+	{
+		switch(character.direction)
+		{
+			case FourDirections.UP:
+				animations.setAnimationByIndex(0);
+				break;
+			case FourDirections.DOWN:
+				animations.setAnimationByIndex(4);
+				break;
+			case FourDirections.LEFT:
+				animations.setAnimationByIndex(2);
+				break;
+			case FourDirections.RIGHT:
+				animations.setAnimationByIndex(6);
+				break;
+		}
+	}
+
+	/**
+	 * Moving.
+	 *
+	 * @param delta the delta
+	 */
+	private void moving(float delta,IAnimationManager animations)
+	{
+		switch(character.direction)
+		{
+			case FourDirections.UP:
+				character.position.setY((int)(character.position.getY() - character.velocity.getY()));
+				animations.setAnimationByIndex(1);
+	
+				break;
+			case FourDirections.DOWN:
+				character.position.setY((int)(character.position.getY() + character.velocity.getY()));
+				animations.setAnimationByIndex(5);
+				break;
+			case FourDirections.LEFT:
+				character.position.setX((int)(character.position.getX() - character.velocity.getX()));
+				animations.setAnimationByIndex(3);
+	
+				break;
+			case FourDirections.RIGHT:
+				character.position.setX((int)(character.position.getX() + character.velocity.getX()));
+				animations.setAnimationByIndex(7);
+				
+				break;
+		}
+	}
+	
+	/**
+	 * Prevent.
+	 *
+	 * @param delta the delta
+	 */
+	public void prevent(float delta)
+	{
+		switch(character.direction)
+		{
+			case FourDirections.UP:
+				character.position.setY((int)(character.position.getY() + character.velocity.getY()));
+				break;
+			case FourDirections.DOWN:
+				character.position.setY((int)(character.position.getY() - character.velocity.getY()));
+				break;
+			case FourDirections.LEFT:
+				character.position.setX((int)(character.position.getX() + character.velocity.getX()));
+				break;
+			case FourDirections.RIGHT:
+				character.position.setX(character.position.getX() - (int)(character.velocity.getX()));
+				break;
+		}
+	}
+	
+	/**
+	 * Update.
+	 *
+	 * @param delta the delta
+	 */
+	public void update(float delta,IAnimationManager animations)
+	{
+		if(character.moving)
+		{
+			moving(delta,animations);
+		}
+		else
+		{
+			standing(animations);
+		}
+		
+		animations.update(delta);
+	}
+}
+
+create a Main Class to launcher the Game
+
+public final class GameLuncher
+{
+	public static final String TITLE = "Game 2D Test";
+	
+	public static final int ORIGINAL_TILESIZE = 16;
+	public static final float SCALE = 3;
+	public static final int TILESIZE = (int) (ORIGINAL_TILESIZE*SCALE);
+	public static final int MAX_NUMBER_ROWS = 12;
+	public static final int MAX_NUMBER_COLUMNS = 19;
+	public static final int WIDTH = TILESIZE*MAX_NUMBER_COLUMNS;
+	public static final int HEIGHT = TILESIZE*MAX_NUMBER_ROWS;
+	
+	public static void main(String[] args)
+	{
+		Game game = new Game(TITLE, WIDTH, HEIGHT, IGameThreadManager.GAME_THREAD_TIMER_TASK);
+		game.addScene(new IslandScene(game,new DartPlayer()).start());
+		game.init(IGameThreadManager.FPS_30);
+	}
+}
+
+create a Scene that extends AbstractScene
+
+/**
+ * The Class IslandScene.
+ */
+public final class IslandScene extends AbstractScene
+{	
+	private ChangeIslandScene sceneTransition;
+
+	/**
+	 * Instantiates a new island scene.
+	 *
+	 * @param game the game
+	 * @param player the player
+	 */
+	public IslandScene(Game game,AbstractCharacter player)
+	{
+		super(game, player);
+	}
+
+	/**
+	 * Start.
+	 *
+	 * @return the scene
+	 */
+	@Override
+	public Scene start()
+	{
+		player.start();
+		
+		TMXLoader tmxLoader = new TMXLoader("/maps/world2.tmx");
+		
+		tileManager = tmxLoader.getTileManager();
+		
+		rects = tmxLoader.getRectsCollidersByAtributeName(COLLISION);
+		transitions = tmxLoader.getRectsCollidersByAtributeName(TRASITION);
+		
+		layers = tmxLoader.getLayers();
+		
+		player.position = tmxLoader.getVector2IListFromPropertyTagName("Player").get(0);
+		charactersArray[0] = player;
+		
+		sceneTransition = new ChangeIslandScene();
+ 		
+		return this;
+	}
+	
+	/**
+	 * Transitions.
+	 *
+	 * @param abstractCharacter the abstract character
+	 * @param collider the collider
+	 */
+	@Override
+	protected void transitions(AbstractCharacter abstractCharacter, Collider collider)
+	{
+		sceneTransition.changeScene(abstractCharacter, collider,game,player);
+	}
+}
+
+create a Class to make transition by others the scenes that you created
+public final class ChangeIslandScene
+{
+	public void changeScene(AbstractCharacter abstractCharacter, Collider collider, Game game, AbstractCharacter player)
+	{
+		if(collider.getId() == 1)
+		{
+			if(abstractCharacter.collider.intersects(collider))
+			{
+				Scene caveScene = new CaveScene(game,player).start();
+//				change position of player when enter cave
+//				player.characterMoviment.position.set(300, 300);
+				game.addScene(caveScene);
+			}
+		}
+		else if(collider.getId() == 2)
+		{
+			if(abstractCharacter.collider.intersects(collider))
+			{
+				Scene cityScene = new CityScene(game,player).start();
+//				change position of player when enter cave
+//				player.characterMoviment.position.set(300, 300);
+				player.direction = FourDirections.UP;
+				game.addScene(cityScene);
+			}
+		}
+		else if(collider.getId() == 4)
+		{
+			if(abstractCharacter.collider.intersects(collider))
+			{
+				Scene templeScene = new TempleScene(game,player).start();
+//				change position of player when enter cave
+//				player.characterMoviment.position.set(300, 300);
+				player.direction = FourDirections.UP;
+				game.addScene(templeScene);
+			}
+		}
+		else if(collider.getId() == 3)
+		{
+			if(abstractCharacter.collider.intersects(collider))
+			{
+				Scene homeScene = new HomeScene(game,player).start();
+//				change position of player when enter cave
+//				player.characterMoviment.position.set(300, 300);
+				player.direction = FourDirections.UP;
+				game.addScene(homeScene);
+			}
+		}
+	}
+}
