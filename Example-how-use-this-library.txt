@@ -334,7 +334,7 @@ public final class IslandScene extends AbstractScene
 	}
 }
 
-create a Class to make transition by others the scenes that you created
+create a Class to make transition by others scenes that you created
 public final class ChangeIslandScene
 {
 	public void changeScene(AbstractCharacter abstractCharacter, Collider collider, Game game, AbstractCharacter player)
